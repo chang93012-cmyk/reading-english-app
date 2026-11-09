@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <meta name="color-scheme" content="light">
+  <title>영어 읽기 놀이터</title>
+  <style>
+    :root {
+      --ink: #30334b;
+      --muted: #64677c;
+      --purple: #7252c6;
+      --purple-dark: #57349f;
+      --paper: #fffdf8;
+      --line: #e6e1ed;
+      --radius: 24px;
+      font-family: "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+      color: var(--ink);
+      background: #f8f5ff;
+      font-synthesis: none;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 280px; min-height: 100vh; line-height: 1.65; }
+    button, input, textarea, select { font: inherit; }
+    button, a, select { -webkit-tap-highlight-color: transparent; }
+    button, .button-link { touch-action: manipulation; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .65; }
+    [hidden] { display: none !important; }
+    :focus-visible { outline: 3px solid #5631a3; outline-offset: 4px; }
+    .shell { width: min(100% - 36px, 920px); margin: 0 auto; padding: 32px 0 50px; }
+    .masthead { display: flex; align-items: center; gap: 15px; margin-bottom: 26px; }
+    .brand-mark { display: grid; place-items: center; width: 62px; height: 62px; flex-shrink: 0; font-size: 32px; border: 1px solid #e6dff5; border-radius: 20px; background: #ede5fb; }
+    .eyebrow { color: #705991; font-size: 12px; font-weight: 800; letter-spacing: .11em; margin: 0 0 2px; }
+    h1 { font-size: clamp(25px, 4.5vw, 34px); margin: 0; line-height: 1.3; letter-spacing: -.045em; }
+    h2 { margin: 0; font-size: 24px; letter-spacing: -.035em; }
+    p { margin: 8px 0; }
+    .muted { color: var(--muted); }
+    .panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; box-shadow: 0 8px 25px #44336507; }
+    .intro { margin: 8px 0 22px; color: var(--muted); font-size: 16px; }
+    .field-label { display: block; font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+    .format { display: inline-block; margin: 0 0 12px; padding: 6px 10px; background: #f4f1fa; border-radius: 8px; font-size: 14px; }
+    textarea { width: 100%; min-height: 310px; padding: 20px; border: 2px solid #e4ddef; border-radius: 18px; background: #fefcff; color: var(--ink); resize: vertical; line-height: 1.9; font-size: 18px; }
+    textarea:focus { border-color: var(--purple); }
+    .help { font-size: 14px; color: var(--muted); }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+    .button, .button-link { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 12px 20px; border: 1px solid transparent; border-radius: 14px; font-size: 17px; font-weight: 750; text-decoration: none; }
+    .primary { background: var(--purple); color: #fff; box-shadow: 0 4px 0 #573ba0; }
+    .primary:hover { background: var(--purple-dark); }
+    .secondary { background: #eee7fb; color: #563795; border-color: #dfd3f3; }
+    .secondary:hover { background: #e5d9f8; }
+    .quiet { background: #fff; color: #563795; border-color: #d9cee9; }
+    .button:active, .button-link:active { transform: translateY(1px); }
+    .status { white-space: pre-line; font-size: 15px; margin-top: 16px; padding: 12px 15px; border-radius: 12px; background: #f3effb; color: #53406d; overflow-wrap: anywhere; }
+    .status:empty { display: none; }
+    .status[data-kind="error"] { color: #923b37; background: #fff0ed; }
+    .status[data-kind="success"] { color: #285f4a; background: #edf8f0; }
+    .status[data-kind="warning"] { color: #765413; background: #fff5da; }
+    .share-panel { margin-top: 24px; padding: 22px; border: 1px solid #dcd1ee; background: #faf7ff; border-radius: 18px; }
+    .share-panel h3 { font-size: 19px; margin: 0 0 8px; }
+    .share-link { width: 100%; background: #fff; color: var(--ink); border: 1px solid #d8cdea; padding: 12px; font-size: 14px; border-radius: 10px; }
+    .share-meta { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
+    .teacher-footnote { font-size: 13px; margin: 18px 3px 0; color: var(--muted); }
+    .book-top { display: flex; align-items: flex-start; gap: 16px; justify-content: space-between; margin-bottom: 16px; }
+    .book-top p { font-size: 16px; color: var(--muted); }
+    .story-count { font-size: 14px; color: #624986; font-weight: 700; margin: 0 0 7px; }
+    .speech-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 18px 0 22px; font-size: 14px; }
+    .speech-controls label { font-weight: 700; }
+    .speech-controls select { color: var(--ink); background: #fff; border: 1px solid #ded5ea; border-radius: 10px; min-height: 44px; padding: 7px 10px; }
+    .voice-note { flex-basis: 100%; color: var(--muted); font-size: 13px; }
+    .story { display: grid; gap: 22px; padding-bottom: 120px; }
+    .dialogue { position: relative; background: var(--paper); border: 2px solid var(--theme-border); border-radius: 25px; overflow: hidden; box-shadow: 0 5px 0 var(--theme-border); }
+    .dialogue-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 18px; background: var(--theme-bg); border-bottom: 1px solid var(--theme-border); }
+    .character { display: flex; align-items: center; gap: 11px; min-width: 0; }
+    .avatar { display: grid; place-items: center; background: #ffffffb3; width: 46px; height: 46px; font-size: 28px; border-radius: 15px; flex-shrink: 0; }
+    .character-name { font-size: 19px; font-weight: 800; overflow-wrap: anywhere; }
+    .speaker { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 48px; min-width: 48px; padding: 10px 13px; color: #fff; background: var(--purple); border: none; border-radius: 15px; box-shadow: 0 3px 0 #563995; flex-shrink: 0; }
+    .speaker:hover { background: var(--purple-dark); }
+    .speaker svg { width: 22px; height: 22px; }
+    .speaker-label { font-size: 14px; font-weight: 750; }
+    .speaker.is-speaking { background: #4d2b92; outline: 3px solid #c9b8ed; outline-offset: 3px; }
+    .dialogue-body { padding: 23px 22px 20px; }
+    .words { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px; }
+    .word { min-height: 52px; max-width: 100%; border: 1px solid var(--theme-border); border-bottom-width: 3px; border-radius: 14px; padding: 6px 14px; font-size: clamp(23px, 3.2vw, 30px); font-weight: 750; line-height: 1.4; letter-spacing: -.02em; color: var(--ink); background: var(--theme-word); overflow-wrap: anywhere; transition: background .15s; }
+    .word:hover { background: var(--theme-bg); }
+    .word.is-speaking { border-color: #8864c9; }
+    .word.bounce { animation: word-bounce .32s ease; }
+    @keyframes word-bounce { 0%, 100% { transform: translateY(0); } 48% { transform: translateY(-8px) rotate(-2deg); } }
+    .meaning { margin: 18px 2px 0; color: #666176; font-size: 16px; line-height: 1.7; overflow-wrap: anywhere; }
+    .line-number { display: block; font-size: 11px; font-weight: 600; color: #666176; line-height: 1.2; margin-bottom: 3px; }
+    .gold-card { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); z-index: 20; display: flex; align-items: center; gap: 16px; width: min(440px, calc(100% - 36px)); padding: 18px 22px; background: #fff1b6; color: #614516; border: 2px solid #d4ac43; border-radius: 22px; box-shadow: 0 8px 28px #70521d24; opacity: 0; visibility: hidden; transform: translate(-50%, 16px); transition: opacity .25s ease, transform .25s ease, visibility .25s; pointer-events: none; }
+    .gold-card.is-visible { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+    .gold-symbol { font-size: 34px; flex-shrink: 0; }
+    .gold-content { min-width: 0; }
+    .gold-caption { font-size: 12px; font-weight: 800; color: #7b5b20; letter-spacing: .06em; }
+    .gold-word { font-size: 24px; font-weight: 850; line-height: 1.35; overflow-wrap: anywhere; }
+    .gold-meaning { font-size: 19px; font-weight: 650; overflow-wrap: anywhere; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    .error-panel { margin-top: 18px; }
+    .error-panel p { white-space: pre-line; overflow-wrap: anywhere; }
+    noscript p { padding: 20px; background: #fff5da; color: #765413; }
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 24px, 920px); padding-top: 22px; }
+      .panel { padding: 20px 16px; }
+      .masthead { gap: 11px; margin-bottom: 22px; }
+      .brand-mark { width: 52px; height: 52px; font-size: 27px; border-radius: 17px; }
+      .actions .button, .actions .button-link { flex: 1 1 150px; }
+      textarea { font-size: 16px; padding: 14px; }
+      .dialogue-top { padding: 12px 14px; }
+      .dialogue-body { padding: 20px 15px; }
+      .words { gap: 8px; }
+      .word { padding: 7px 11px; }
+      .speaker-label { display: none; }
+      .character-name { font-size: 18px; }
+      .share-panel { padding: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <noscript><p>이 앱을 사용하려면 브라우저 설정에서 자바스크립트를 허용해 주세요.</p></noscript>
+  <main class="shell">
+    <header class="masthead">
+      <div class="brand-mark" aria-hidden="true">📖</div>
+      <div>
+        <p class="eyebrow">READ, LISTEN &amp; LEARN</p>
+        <h1>영어 읽기 놀이터</h1>
+      </div>
+    </header>
+
+    <section id="teacher-mode" class="panel" aria-labelledby="teacher-heading" hidden>
+      <h2 id="teacher-heading">우리 반 이야기 만들기</h2>
+      <p class="intro">대본을 쓰고 링크를 나누면, 아이들의 영어 동화책이 완성돼요.</p>
+      <label class="field-label" for="script-input">대화 대본을 입력해 주세요.</label>
+      <div class="format">캐릭터 이름 : 영어 문장 : 한국어 뜻</div>
+      <textarea id="script-input" spellcheck="false" maxlength="30000" aria-describedby="input-help translation-help" placeholder="앨리스 : What time is it?&#10;토끼 : It is time to play."></textarea>
+      <p id="input-help" class="help">한 줄에 한 문장을 입력해 주세요. 처음에는 한국어 뜻을 비워도 괜찮아요. 이름이나 문장 안에는 구분 기호(: 또는 |)를 넣지 마세요.</p>
+      <p id="translation-help" class="help">‘전체 번역하기’는 내장 예문 사전을 사용하는 임시 기능이에요. 지원하지 않는 문장은 직접 뜻을 입력해 주세요. 이미 적은 뜻은 유지돼요.</p>
+      <div class="actions">
+        <button id="translate-button" type="button" class="button secondary">전체 번역하기</button>
+        <button id="generate-button" type="button" class="button primary">배포 링크 생성</button>
+      </div>
+      <p id="teacher-status" class="status" role="status" aria-live="polite" aria-atomic="true"></p>
+      <section id="share-panel" class="share-panel" aria-labelledby="share-heading" hidden>
+        <h3 id="share-heading">학생에게 이 링크를 보내 주세요.</h3>
+        <label for="share-link" class="sr-only">학생용 배포 링크입니다.</label>
+        <input id="share-link" class="share-link" type="text" readonly spellcheck="false">
+        <div class="actions">
+          <button id="copy-button" type="button" class="button primary">링크 복사하기</button>
+          <a id="preview-link" class="button-link quiet" target="_blank" rel="noopener noreferrer">학생 화면 미리보기</a>
+        </div>
+        <p id="share-meta" class="share-meta"></p>
+        <p id="share-warning" class="status" data-kind="warning" hidden></p>
+        <p id="copy-status" class="status" role="status" aria-live="polite" aria-atomic="true"></p>
+      </section>
+      <p class="teacher-footnote">대본은 서버에 저장되지 않고 링크 안에 들어가요. Base64는 암호화가 아니므로 학생 실명이나 개인정보를 넣지 마세요. 링크를 만든 뒤 대본을 수정했다면 새 링크를 만들어 주세요.</p>
+    </section>
+
+    <section id="student-mode" aria-labelledby="student-heading" hidden>
+      <div class="book-top">
+        <div>
+          <p id="story-count" class="story-count"></p>
+          <h2 id="student-heading">소리 내어 함께 읽어요!</h2>
+          <p>단어를 누르면 발음이 나와요. 보라색 스피커를 누르면 문장 전체를 들을 수 있어요.</p>
+        </div>
+      </div>
+      <div class="speech-controls">
+        <label for="speech-rate">읽기 속도를 골라 주세요.</label>
+        <select id="speech-rate">
+          <option value="0.75">천천히 읽어요.</option>
+          <option value="0.9" selected>또박또박 읽어요.</option>
+          <option value="1">보통 속도로 읽어요.</option>
+        </select>
+        <span id="voice-note" class="voice-note"></span>
+      </div>
+      <p id="speech-status" class="status" role="status" aria-live="polite" aria-atomic="true"></p>
+      <div id="story" class="story"></div>
+    </section>
+
+    <section id="error-mode" class="panel error-panel" aria-labelledby="error-heading" hidden>
+      <h2 id="error-heading">이야기 링크를 확인해 주세요.</h2>
+      <p id="error-message" class="muted"></p>
+      <p>주소 전체를 복사했는지 확인하거나 선생님께 새 링크를 요청해 주세요.</p>
+      <a id="editor-link" class="button-link secondary">교사 에디터로 이동하기</a>
+    </section>
+  </main>
+
+  <aside id="gold-card" class="gold-card" aria-hidden="true">
+    <div class="gold-symbol" aria-hidden="true">✨</div>
+    <div class="gold-content">
+      <div class="gold-caption">단어의 뜻을 찾았어요!</div>
+      <div id="gold-word" class="gold-word" lang="en"></div>
+      <div id="gold-meaning" class="gold-meaning"></div>
+    </div>
+  </aside>
+  <p id="dictionary-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+
+  <template id="speaker-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M11 5 6 9H3v6h3l5 4V5Z"></path>
+      <path d="M15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"></path>
+    </svg>
+  </template>
+
+  <!-- Pure utilities are separated so parsing and Unicode URL encoding can be tested. -->
+  <script id="app-core">
+    'use strict';
+    const AppCore = (() => {
+      const MAX_TEXT_LENGTH = 30000;
+      const MAX_DATA_LENGTH = 150000;
+      const MAX_LINES = 120;
+      const TRANSLATION_PLACEHOLDER = '[뜻을 직접 입력해 주세요]';
+
+      // Elementary sample dictionary: add more entries here when needed.
+      // Keys are lowercase words with punctuation removed.
+      const dictionary = Object.freeze({
+        // --- A ---
+        'about': '~에 대하여', 'act': '행동하다', 'address': '주소', 'afraid': '두려워하는', 
+        'after': '~후에', 'afternoon': '오후', 'again': '다시', 'age': '나이', 
+        'ago': '~전에', 'air': '공기', 'airplane': '비행기', 'airport': '공항', 
+        'album': '앨범', 'all': '모든', 'along': '~을 따라', 'always': '항상', 
+        'am': '~이다', 'among': '~사이에', 'and': '그리고', 'angry': '화난', 
+        'animal': '동물', 'answer': '대답하다', 'ant': '개미', 'any': '어떤', 
+        'apple': '사과', 'are': '~이다', 'arm': '팔', 'around': '주위에', 
+        'arrive': '도착하다', 'art': '미술', 'as': '~처럼', 'ask': '묻다', 
+        'at': '~에', 'aunt': '이모, 고모', 'autumn': '가을', 'away': '멀리',
+
+        // --- B ---
+        'baby': '아기', 'back': '뒤, 등', 'bad': '나쁜', 'bag': '가방', 
+        'ball': '공', 'balloon': '풍선', 'banana': '바나나', 'band': '밴드', 
+        'bank': '은행', 'base': '기초', 'basket': '바구니', 'bath': '목욕', 
+        'be': '~이다, 있다', 'bear': '곰', 'beautiful': '아름다운', 'because': '왜냐하면', 
+        'become': '~이 되다', 'bed': '침대', 'bee': '벌', 'beef': '소고기', 
+        'before': '~전에', 'begin': '시작하다', 'behind': '~뒤에', 'bell': '종', 
+        'below': '~아래에', 'bench': '벤치', 'beside': '~옆에', 'best': '최고의', 
+        'better': '더 좋은', 'between': '~사이에', 'big': '큰', 'bike': '자전거', 
+        'bird': '새', 'birth': '탄생', 'birthday': '생일', 'black': '검은색', 
+        'block': '블록', 'blow': '불다', 'blue': '파란색', 'board': '판, 게시판', 
+        'boat': '보트', 'body': '몸', 'book': '책', 'boot': '부츠', 
+        'born': '태어난', 'both': '둘 다', 'bottle': '병', 'bottom': '바닥', 
+        'bowl': '그릇', 'box': '상자', 'boy': '소년', 'branch': '나뭇가지', 
+        'bread': '빵', 'break': '깨다', 'breakfast': '아침 식사', 'bridge': '다리', 
+        'bring': '가져오다', 'brother': '형제', 'brown': '갈색', 'brush': '붓, 빗다', 
+        'build': '짓다', 'building': '건물', 'burn': '타다', 'bus': '버스', 
+        'busy': '바쁜', 'but': '그러나', 'butter': '버터', 'button': '버튼', 
+        'buy': '사다', 'by': '~옆에, ~에 의해',
+
+        // --- C ---
+        'cabbage': '양배추', 'cake': '케이크', 'calendar': '달력', 'call': '부르다, 전화하다', 
+        'camera': '카메라', 'camp': '캠프', 'can': '할 수 있다', 'candle': '양초', 
+        'cap': '모자', 'capital': '수도', 'car': '자동차', 'card': '카드', 
+        'care': '돌보다', 'carry': '나르다', 'case': '상자, 경우', 'cat': '고양이', 
+        'catch': '잡다', 'cause': '원인', 'center': '중앙', 'certain': '확실한', 
+        'chair': '의자', 'chalk': '분필', 'chance': '기회', 'change': '바꾸다', 
+        'cheap': '싼', 'check': '확인하다', 'cheese': '치즈', 'chicken': '닭, 닭고기', 
+        'chief': '우두머리', 'child': '아이', 'children': '아이들', 'church': '교회', 
+        'circle': '원', 'city': '도시', 'class': '수업, 반', 'classmate': '반 친구', 
+        'clean': '깨끗한, 청소하다', 'clear': '맑은', 'climb': '오르다', 'clock': '시계', 
+        'close': '닫다', 'cloth': '천', 'clothes': '옷', 'cloud': '구름', 
+        'club': '동아리', 'coat': '코트', 'coin': '동전', 'cold': '추운, 감기', 
+        'color': '색깔', 'come': '오다', 'common': '흔한', 'computer': '컴퓨터', 
+        'cook': '요리하다', 'cool': '시원한', 'copy': '복사하다', 'corner': '모퉁이', 
+        'cost': '비용', 'cotton': '솜', 'count': '세다', 'country': '나라', 
+        'course': '코스', 'cover': '덮다', 'cow': '소', 'cross': '건너다', 
+        'cry': '울다', 'cup': '컵', 'cut': '자르다',
+
+        // --- D ---
+        'dad': '아빠', 'dance': '춤추다', 'danger': '위험', 'dark': '어두운', 
+        'date': '날짜', 'daughter': '딸', 'day': '낮, 하루', 'dead': '죽은', 
+        'dear': '친애하는', 'death': '죽음', 'deep': '깊은', 'deer': '사슴', 
+        'desk': '책상', 'dial': '다이얼', 'diary': '일기', 'die': '죽다', 
+        'different': '다른', 'dirty': '더러운', 'dish': '접시', 'do': '하다', 
+        'doctor': '의사', 'dog': '개', 'doll': '인형', 'dollar': '달러', 
+        'door': '문', 'down': '아래로', 'draw': '그리다', 'dream': '꿈', 
+        'dress': '원피스', 'drink': '마시다', 'drive': '운전하다', 'driver': '운전사', 
+        'drop': '떨어뜨리다', 'dry': '마른', 'duck': '오리', 'dust': '먼지',
+
+        // --- E ---
+        'each': '각각의', 'ear': '귀', 'early': '일찍', 'earth': '지구', 
+        'east': '동쪽', 'easy': '쉬운', 'eat': '먹다', 'egg': '달걀', 
+        'eight': '8', 'elephant': '코끼리', 'empty': '빈', 'end': '끝', 
+        'engine': '엔진', 'enjoy': '즐기다', 'enough': '충분한', 'enter': '들어가다', 
+        'evening': '저녁', 'every': '모든', 'example': '예', 'excellent': '훌륭한', 
+        'excuse': '용서하다', 'exercise': '운동', 'eye': '눈',
+
+        // --- F ---
+        'face': '얼굴', 'fact': '사실', 'fall': '떨어지다, 가을', 'family': '가족', 
+        'famous': '유명한', 'far': '먼', 'farm': '농장', 'farmer': '농부', 
+        'fast': '빠른', 'fat': '뚱뚱한', 'father': '아버지', 'feel': '느끼다', 
+        'few': '적은', 'field': '들판', 'fifteen': '15', 'fifty': '50', 
+        'fight': '싸우다', 'fill': '채우다', 'film': '영화, 필름', 'find': '찾다', 
+        'fine': '좋은', 'finger': '손가락', 'finish': '끝내다', 'fire': '불', 
+        'first': '첫째의', 'fish': '물고기', 'five': '5', 'flag': '깃발', 
+        'floor': '바닥', 'flower': '꽃', 'fly': '날다, 파리', 'follow': '따르다', 
+        'food': '음식', 'fool': '바보', 'foot': '발', 'for': '~을 위하여', 
+        'forget': '잊다', 'fork': '포크', 'forty': '40', 'four': '4', 
+        'fox': '여우', 'free': '자유로운', 'fresh': '신선한', 'friend': '친구', 
+        'frog': '개구리', 'from': '~로부터', 'front': '앞', 'fruit': '과일', 
+        'full': '가득 찬', 'fun': '재미',
+
+        // --- G ---
+        'game': '게임', 'garden': '정원', 'gas': '가스', 'gate': '문', 
+        'gentle': '온화한', 'get': '얻다', 'girl': '소녀', 'give': '주다', 
+        'glad': '기쁜', 'glass': '유리, 컵', 'glove': '장갑', 'go': '가다', 
+        'goal': '목표', 'god': '신', 'gold': '금', 'good': '좋은', 
+        'goose': '거위', 'grand': '웅장한', 'grandfather': '할아버지', 'grandmother': '할머니', 
+        'grape': '포도', 'grass': '풀', 'gray': '회색', 'great': '위대한, 아주 좋은', 
+        'green': '초록색', 'ground': '땅', 'group': '무리', 'grow': '자라다', 
+        'guess': '추측하다', 'guest': '손님', 'guide': '안내하다', 'guitar': '기타', 
+
+        // --- H ---
+        'habit': '습관', 'hair': '머리카락', 'half': '절반', 'hall': '홀', 
+        'hand': '손', 'handle': '손잡이', 'happen': '일어나다', 'happy': '행복한', 
+        'hard': '단단한, 어려운', 'hat': '모자', 'hate': '미워하다', 'have': '가지다', 
+        'he': '그는', 'her': '그녀의', 'head': '머리', 'hear': '듣다', 'heart': '마음, 심장', 
+        'heavy': '무거운', 'hello': '안녕', 'help': '돕다', 'hen': '암탉', 
+        'here': '여기에', 'hide': '숨다', 'high': '높은', 'hill': '언덕', 
+        'hit': '치다', 'hold': '잡다', 'hole': '구멍', 'holiday': '휴일', 
+        'home': '집', 'hope': '희망하다', 'horse': '말', 'hospital': '병원', 
+        'hot': '뜨거운', 'hotel': '호텔', 'hour': '시간', 'house': '집', 
+        'how': '어떻게', 'hundred': '100', 'hungry': '배고픈', 'hurry': '서두르다', 'hurt': '다치다',
+
+        // --- I, J, K ---
+        'i': '나', 'ice': '얼음', 'idea': '생각', 'if': '만약', 
+        'ill': '아픈', 'in': '~안에', 'ink': '잉크', 'interest': '흥미', 
+        'into': '~안으로', 'introduce': '소개하다', 'iron': '철, 다리미', 'is': '~이다', 
+        'island': '섬', 'it': '그것',
+        'jacket': '재킷', 'job': '직업', 'join': '가입하다', 'juice': '주스', 
+        'jump': '뛰다', 'jungle': '정글', 'just': '단지, 방금',
+        'keep': '유지하다', 'key': '열쇠', 'kick': '차다', 'kid': '아이', 
+        'kill': '죽이다', 'kind': '친절한, 종류', 'king': '왕', 'kiss': '뽀뽀하다', 
+        'kitchen': '부엌', 'knee': '무릎', 'knife': '칼', 'knock': '두드리다', 'know': '알다',
+
+        // --- L ---
+        'lady': '숙녀', 'lake': '호수', 'lamp': '램프', 'land': '육지', 
+        'large': '큰', 'last': '마지막의', 'late': '늦은', 'laugh': '웃다', 
+        'lead': '이끌다', 'leaf': '나뭇잎', 'learn': '배우다', 'leave': '떠나다', 
+        'left': '왼쪽', 'leg': '다리', 'lesson': '수업', 'let': '~하게 하다', 
+        'lets': '~하자', 'letter': '편지, 글자', 'library': '도서관', 'lie': '거짓말, 눕다', 
+        'life': '생명, 삶', 'light': '빛, 가벼운', 'like': '좋아하다, ~처럼', 'line': '선', 
+        'lion': '사자', 'lip': '입술', 'list': '목록', 'listen': '듣다', 
+        'little': '작은', 'live': '살다', 'long': '긴', 'look': '보다', 
+        'lose': '잃다', 'lot': '많음', 'love': '사랑하다', 'low': '낮은', 
+        'luck': '행운', 'lunch': '점심',
+
+        // --- M, N ---
+        'machine': '기계', 'mad': '화난', 'make': '만들다', 'man': '남자', 
+        'many': '많은', 'map': '지도', 'march': '행진하다', 'market': '시장', 
+        'marry': '결혼하다', 'matter': '문제', 'may': '~일지도 모른다', 'me': '나를', 
+        'meat': '고기', 'meet': '만나다', 'melon': '멜론', 'memory': '기억', 
+        'menu': '메뉴', 'middle': '중간', 'milk': '우유', 'million': '백만', 
+        'mind': '마음', 'minute': '분', 'mirror': '거울', 'miss': '그리워하다, 놓치다', 
+        'monkey': '원숭이', 'month': '달(월)', 'moon': '달', 'morning': '아침', 
+        'mother': '어머니', 'mountain': '산', 'mouse': '쥐', 'mouth': '입', 
+        'move': '움직이다', 'much': '많은', 'music': '음악', 'must': '~해야 한다',
+        'name': '이름', 'narrow': '좁은', 'nature': '자연', 'near': '~가까이', 
+        'neck': '목', 'need': '필요하다', 'never': '결코 ~않다', 'new': '새로운', 
+        'news': '뉴스', 'next': '다음의', 'nice': '좋은', 'night': '밤', 
+        'nine': '9', 'no': '아니오', 'nobody': '아무도 ~않다', 'nod': '끄덕이다', 
+        'noise': '소음', 'none': '아무것도 ~않다', 'noon': '정오', 'north': '북쪽', 
+        'nose': '코', 'not': '아니다', 'note': '메모', 'nothing': '아무것도 없음', 
+        'now': '지금', 'number': '숫자', 'nurse': '간호사',
+
+        // --- O, P, Q ---
+        'ocean': '바다', 'oclock': '~시 (정각)', 'of': '~의', 'off': '떨어져서', 'office': '사무실', 
+        'often': '자주', 'oh': '오', 'oil': '기름', 'ok': '좋아', 
+        'old': '나이 든, 낡은', 'on': '~위에', 'once': '한번', 'one': '1', 
+        'only': '오직', 'open': '열다', 'or': '또는', 'orange': '오렌지', 
+        'order': '명령하다, 주문', 'other': '다른', 'out': '밖으로', 'over': '~넘어서', 'own': '자신의',
+        'page': '페이지', 'paint': '칠하다', 'pair': '한 쌍', 'pants': '바지', 
+        'paper': '종이', 'pardon': '용서하다', 'parent': '부모', 'park': '공원', 
+        'part': '부분', 'party': '파티', 'pass': '지나가다', 'pay': '지불하다', 
+        'peace': '평화', 'pen': '펜', 'pencil': '연필', 'people': '사람들', 
+        'pepper': '후추', 'perfect': '완벽한', 'piano': '피아노', 'pick': '고르다', 
+        'picture': '사진, 그림', 'piece': '조각', 'pig': '돼지', 'pilot': '조종사', 
+        'pin': '핀', 'pine': '소나무', 'pink': '분홍색', 'pipe': '파이프', 
+        'place': '장소', 'plan': '계획', 'plane': '비행기', 'plant': '식물', 
+        'play': '놀다', 'please': '제발', 'pocket': '주머니', 'point': '가리키다', 
+        'police': '경찰', 'pool': '수영장', 'poor': '가난한', 'post': '우편', 
+        'potato': '감자', 'present': '선물, 현재', 'press': '누르다', 'pretty': '예쁜', 
+        'price': '가격', 'print': '인쇄하다', 'problem': '문제', 'pull': '당기다', 
+        'push': '밀다', 'put': '놓다',
+        'queen': '여왕', 'question': '질문', 'quick': '빠른', 'quiet': '조용한',
+
+        // --- R, S ---
+        'rabbit': '토끼', 'race': '경주', 'radio': '라디오', 'rain': '비', 
+        'rainbow': '무지개', 'read': '읽다', 'ready': '준비된', 'real': '진짜의', 
+        'red': '빨간색', 'remember': '기억하다', 'rest': '휴식', 'return': '돌아오다', 
+        'ribbon': '리본', 'rice': '쌀, 밥', 'rich': '부유한', 'ride': '타다', 
+        'right': '오른쪽, 옳은', 'ring': '반지', 'river': '강', 'road': '길', 
+        'robot': '로봇', 'rock': '바위', 'rocket': '로켓', 'roll': '구르다', 
+        'roof': '지붕', 'room': '방', 'root': '뿌리', 'rose': '장미', 
+        'round': '둥근', 'rule': '규칙', 'run': '달리다',
+        'sad': '슬픈', 'safe': '안전한', 'salt': '소금', 'same': '같은', 
+        'sand': '모래', 'say': '말하다', 'school': '학교', 'score': '점수', 
+        'sea': '바다', 'season': '계절', 'seat': '자리', 'second': '두 번째, 초', 
+        'secret': '비밀', 'see': '보다', 'seed': '씨앗', 'sell': '팔다', 
+        'send': '보내다', 'service': '서비스', 'set': '놓다', 'seven': '7', 
+        'shadow': '그림자', 'shake': '흔들다', 'shape': '모양', 'share': '나누다', 
+        'she': '그녀는', 'sheep': '양', 'sheet': '시트, 장', 'ship': '배', 
+        'shirt': '셔츠', 'shoe': '신발', 'shoot': '쏘다', 'shop': '가게', 
+        'short': '짧은', 'shoulder': '어깨', 'shout': '외치다', 'show': '보여주다', 
+        'shower': '샤워', 'shut': '닫다', 'sick': '아픈', 'side': '쪽, 면', 
+        'sign': '신호', 'silver': '은', 'sing': '노래하다', 'sir': '선생님', 
+        'sister': '자매', 'sit': '앉다', 'six': '6', 'size': '크기', 
+        'skate': '스케이트', 'skirt': '치마', 'sky': '하늘', 'sleep': '자다', 
+        'slide': '미끄러지다', 'slow': '느린', 'small': '작은', 'smell': '냄새', 
+        'smile': '미소', 'smoke': '연기', 'snow': '눈(날씨)', 'so': '그래서, 너무', 
+        'soap': '비누', 'soccer': '축구', 'sock': '양말', 'soft': '부드러운', 
+        'some': '약간의', 'son': '아들', 'song': '노래', 'soon': '곧', 
+        'sound': '소리', 'soup': '수프', 'south': '남쪽', 'space': '우주, 공간', 
+        'speak': '말하다', 'speed': '속도', 'spell': '철자하다', 'spend': '소비하다', 
+        'spoon': '숟가락', 'sport': '스포츠', 'spring': '봄', 'square': '정사각형', 
+        'stamp': '우표', 'stand': '서다', 'star': '별', 'start': '시작하다', 
+        'station': '역', 'stay': '머무르다', 'step': '걸음', 'stick': '막대기', 
+        'stone': '돌', 'stop': '멈추다', 'store': '가게', 'storm': '폭풍', 
+        'story': '이야기', 'street': '거리', 'strike': '치다', 'strong': '강한', 
+        'student': '학생', 'study': '공부하다', 'stupid': '어리석은', 'sugar': '설탕', 
+        'summer': '여름', 'sun': '태양', 'supper': '저녁 식사', 'sure': '확실한', 
+        'surprise': '놀라게 하다', 'sweet': '달콤한', 'swim': '수영하다', 'swing': '그네', 'switch': '스위치',
+
+        // --- T, U, V ---
+        'table': '탁자', 'tail': '꼬리', 'take': '가져가다', 'talk': '이야기하다', 
+        'tall': '키가 큰', 'tape': '테이프', 'taste': '맛', 'tax': '세금', 
+        'taxi': '택시', 'tea': '차', 'teach': '가르치다', 'teacher': '선생님', 
+        'team': '팀', 'tear': '눈물', 'tell': '말하다', 'ten': '10', 
+        'tennis': '테니스', 'tent': '텐트', 'test': '시험', 'than': '~보다', 
+        'thank': '감사하다', 'that': '저것', 'the': '그', 'then': '그때', 
+        'there': '거기에', 'these': '이것들', 'they': '그들은', 'thick': '두꺼운', 
+        'thin': '얇은', 'thing': '물건', 'think': '생각하다', 'thirsty': '목마른', 
+        'this': '이것', 'those': '저것들', 'though': '비록 ~일지라도', 'thousand': '1000', 
+        'three': '3', 'throw': '던지다', 'ticket': '표', 'tie': '묶다, 넥타이', 
+        'tiger': '호랑이', 'time': '시간', 'tired': '피곤한', 'to': '~로', 
+        'today': '오늘', 'together': '함께', 'tomato': '토마토', 'tomorrow': '내일', 
+        'tongue': '혀', 'tonight': '오늘 밤', 'too': '너무, 또한', 'tooth': '이빨', 
+        'top': '꼭대기', 'touch': '만지다', 'town': '마을', 'toy': '장난감', 
+        'train': '기차', 'travel': '여행하다', 'tree': '나무', 'trip': '여행', 
+        'true': '사실의', 'try': '노력하다', 'tulip': '튤립', 'turn': '돌다', 
+        'twelve': '12', 'twenty': '20', 'two': '2',
+        'umbrella': '우산', 'uncle': '삼촌', 'under': '~아래에', 'understand': '이해하다', 
+        'until': '~할 때까지', 'up': '위로', 'us': '우리를', 'use': '사용하다', 
+        'useful': '유용한', 'usual': '보통의',
+        'vacation': '방학', 'valley': '계곡', 'very': '매우', 'village': '마을', 
+        'visit': '방문하다', 'voice': '목소리',
+
+        // --- W, Y, Z ---
+        'wait': '기다리다', 'wake': '깨다', 'walk': '걷다', 'wall': '벽', 
+        'want': '원하다', 'warm': '따뜻한', 'wash': '씻다', 'waste': '낭비하다', 
+        'watch': '시계, 보다', 'water': '물', 'way': '길, 방법', 'we': '우리는', 
+        'weak': '약한', 'wear': '입다', 'weather': '날씨', 'week': '주', 
+        'welcome': '환영하다', 'well': '잘', 'west': '서쪽', 'wet': '젖은', 
+        'what': '무엇', 'when': '언제', 'where': '어디에', 'which': '어느 것', 
+        'white': '흰색', 'who': '누구', 'why': '왜', 'wide': '넓은', 
+        'wife': '아내', 'wild': '야생의', 'will': '~할 것이다', 'win': '이기다', 
+        'wind': '바람', 'window': '창문', 'wing': '날개', 'winter': '겨울', 
+        'wise': '현명한', 'with': '~와 함께', 'woman': '여자', 'wood': '나무, 숲', 
+        'word': '단어', 'work': '일하다', 'world': '세계', 'worry': '걱정하다', 
+        'worst': '가장 나쁜', 'write': '쓰다', 'wrong': '틀린',
+        'year': '년', 'yellow': '노란색', 'yes': '네', 'yesterday': '어제', 
+        'yet': '아직', 'you': '너는, 너를', 'young': '젊은', 'your': '너의',
+        'zero': '0', 'zoo': '동물원'
+      });
+
+      function normalizeSentence(text) {
+        return text.trim().toLowerCase()
+          .replace(/[’‘]/g, "'")
+          .replace(/\s+/g, ' ')
+          .replace(/[.!?]+$/g, '')
+          .trim();
+      }
+
+      // 발급받은 구글 스크립트 웹 앱 URL을 아래 따옴표 안에 넣으세요.
+      const GAS_URL = 'https://script.google.com/macros/s/AKfycbw8Sa6Xq3bQ2r_un19PjtjS5QxQkJm2Mi9DdOCV2Vo8K7gsoU-hV1fpWAFmY9TcH4HU/exec';
+
+      async function translateSentence(english) {
+        try {
+          const response = await fetch(`${GAS_URL}?text=${encodeURIComponent(english)}`);
+          if (!response.ok) return null;
+          return await response.text();
+        } catch (error) {
+          console.error("번역 통신 에러:", error);
+          return null;
+        }
+      }
+
+      function normalizeWord(word) {
+        return word.toLowerCase().replace(/[^a-z]/g, '');
+      }
+
+      function findMeaning(word) {
+        const key = normalizeWord(word);
+        return Object.prototype.hasOwnProperty.call(dictionary, key)
+          ? dictionary[key] : null;
+      }
+
+      function parseScript(text, requireKorean = false) {
+        if (typeof text !== 'string' || !text.trim()) {
+          throw new Error('먼저 대본을 한 줄 이상 입력해 주세요.');
+        }
+        if (text.length > MAX_TEXT_LENGTH) {
+          throw new Error('대본이 너무 길어요. 30,000자 이하로 나누어 주세요.');
+        }
+        const rows = [];
+        const errors = [];
+        text.replace(/^\uFEFF/, '').split(/\r\n|\n|\r/).forEach((line, index) => {
+          if (!line.trim()) return;
+          const parts = line.split(/\||:|：/).map(part => part.trim());
+          if (parts.length < 2 || parts.length > 3) {
+            errors.push(`${index + 1}번째 줄은 ‘캐릭터 : 영어 : 한글’ 형식으로 입력해 주세요.`);
+            return;
+          }
+          const [character, rawEnglish, korean = ''] = parts;
+          const english = rawEnglish.replace(/\s+/g, ' ');
+          if (!character || !english) {
+            errors.push(`${index + 1}번째 줄의 캐릭터 이름과 영어 문장을 채워 주세요.`);
+            return;
+          }
+          if (character.length > 28 || english.length > 400 || korean.length > 240) {
+            errors.push(`${index + 1}번째 줄을 줄여 주세요. 이름은 28자, 영어는 400자, 뜻은 240자까지 입력할 수 있어요.`);
+            return;
+          }
+          if (requireKorean && (!korean || korean === TRANSLATION_PLACEHOLDER)) {
+            errors.push(`${index + 1}번째 줄의 한국어 뜻을 완성해 주세요.`);
+            return;
+          }
+          rows.push({ character, english, korean, lineNumber: index + 1 });
+        });
+        if (errors.length) {
+          const visible = errors.slice(0, 5);
+          if (errors.length > 5) visible.push(`그 밖에 ${errors.length - 5}개 줄을 더 확인해 주세요.`);
+          throw new Error(visible.join('\n'));
+        }
+        if (!rows.length) throw new Error('대본을 한 줄 이상 입력해 주세요.');
+        if (rows.length > MAX_LINES) throw new Error('대본은 120줄까지 만들 수 있어요. 이야기를 나누어 주세요.');
+        return rows;
+      }
+
+      function serializeRows(rows) {
+        return rows.map(row => `${row.character} : ${row.english} : ${row.korean}`).join('\n');
+      }
+
+      // UTF-8 + Base64URL: handles Hangul, emoji, apostrophes, and line breaks.
+      function encodeScript(text) {
+        const bytes = new TextEncoder().encode(text);
+        let binary = '';
+        for (const byte of bytes) binary += String.fromCharCode(byte);
+        return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+      }
+
+      function decodeScript(data) {
+        if (!data || data.length > MAX_DATA_LENGTH || !/^[A-Za-z0-9_-]+$/.test(data) || data.length % 4 === 1) {
+          throw new Error('링크의 대본 데이터가 비어 있거나 올바르지 않아요.');
+        }
+        try {
+          const base64 = data.replace(/-/g, '+').replace(/_/g, '/');
+          const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
+          const binary = atob(padded);
+          const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+          return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+        } catch (_) {
+          throw new Error('링크의 글자를 읽을 수 없어요. 주소가 중간에 잘리지 않았는지 확인해 주세요.');
+        }
+      }
+
+      return Object.freeze({
+        dictionary, TRANSLATION_PLACEHOLDER, parseScript, serializeRows,
+        translateSentence, normalizeWord, findMeaning, encodeScript, decodeScript
+      });
+    })();
+  </script>
+
+  <script id="app-ui">
+    'use strict';
+    (() => {
+      const $ = id => document.getElementById(id);
+      const sampleScript = [
+        '앨리스 : What time is it?',
+        '토끼 : It is time to play.',
+        '민준 : I like my cat.',
+        '고양이 : Look! A small rabbit.',
+        "앨리스 : Let's read a book."
+      ].join('\n');
+
+      // Theme assignment follows first appearance, cycling after six characters.
+      const themes = [
+        { emoji: '👧', bg: '#ffe7ee', border: '#f1cbd8', word: '#fff2f6' },
+        { emoji: '🐰', bg: '#e9e2ff', border: '#d8ccef', word: '#f4efff' },
+        { emoji: '👦', bg: '#e0efff', border: '#c4daef', word: '#eef6ff' },
+        { emoji: '🐱', bg: '#fff0cf', border: '#ead8ac', word: '#fff8e9' },
+        { emoji: '🐻', bg: '#e3f3e8', border: '#c6dfcf', word: '#eff9f2' },
+        { emoji: '🦊', bg: '#ffe7d9', border: '#edcbb9', word: '#fff3eb' }
+      ];
+
+      let goldTimer = null;
+      let announcementTimer = null;
+      let currentUtterance = null;
+      let activeButton = null;
+      let speechSequence = 0;
+      let englishVoice = null;
+      let synth = null;
+      try {
+        if ('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) {
+          synth = window.speechSynthesis;
+        }
+      } catch (_) { /* Reading still works without speech support. */ }
+
+      function setStatus(element, text, kind = 'info') {
+        element.textContent = text;
+        element.dataset.kind = kind;
+      }
+
+      function getBaseUrl() {
+        const url = new URL(window.location.href);
+        url.search = '';
+        url.hash = '';
+        return url;
+      }
+
+      function refreshVoices() {
+        if (!synth) return;
+        try {
+          const voices = synth.getVoices();
+          const english = voices.filter(voice => /^en(?:-|_|$)/i.test(voice.lang));
+          englishVoice = english.find(voice => /^en[-_]US$/i.test(voice.lang) && voice.localService)
+            || english.find(voice => /^en[-_]US$/i.test(voice.lang))
+            || english.find(voice => voice.localService)
+            || english[0]
+            || null;
+          if (englishVoice) {
+            $('voice-note').textContent = '기기에 있는 영어 음성으로 읽어요. 발음과 목소리는 기기마다 달라질 수 있어요.';
+          } else {
+            $('voice-note').textContent = '브라우저의 기본 영어 음성을 사용해요. 소리가 나지 않으면 기기의 영어 음성 설정을 확인해 주세요.';
+          }
+        } catch (_) {
+          englishVoice = null;
+          $('voice-note').textContent = '기본 영어 음성으로 읽어요. 소리가 나지 않으면 다른 브라우저에서 열어 주세요.';
+        }
+      }
+
+      function clearSpeakingStyle() {
+        if (activeButton) {
+          activeButton.classList.remove('is-speaking');
+          activeButton.removeAttribute('aria-busy');
+          activeButton = null;
+        }
+      }
+
+      // Only called by user clicks. Cancel queued speech so rapid taps do not stack up.
+      function speak(text, button) {
+        if (!synth) {
+          setStatus($('speech-status'), '이 브라우저에서는 소리 듣기를 사용할 수 없어요. 최신 Chrome, Edge 또는 Safari에서 열어 주세요. 단어 뜻은 계속 확인할 수 있어요.', 'warning');
+          return;
+        }
+        const utteranceId = ++speechSequence;
+        clearSpeakingStyle();
+        try {
+          synth.cancel();
+          refreshVoices();
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = englishVoice ? englishVoice.lang : 'en-US';
+          if (englishVoice) utterance.voice = englishVoice;
+          utterance.rate = Number($('speech-rate').value) || 0.9;
+          utterance.pitch = 1;
+          utterance.volume = 1;
+          currentUtterance = utterance;
+          activeButton = button;
+          const finish = () => {
+            if (utteranceId !== speechSequence) return;
+            clearSpeakingStyle();
+            currentUtterance = null;
+          };
+          utterance.onstart = () => {
+            if (utteranceId !== speechSequence) return;
+            button.classList.add('is-speaking');
+            button.setAttribute('aria-busy', 'true');
+          };
+          utterance.onend = finish;
+          utterance.onerror = event => {
+            if (utteranceId !== speechSequence) return;
+            finish();
+            if (event.error === 'interrupted' || event.error === 'canceled') return;
+            const detail = event.error === 'not-allowed'
+              ? '소리 재생이 허용되지 않았어요. 브라우저 설정을 확인한 뒤 버튼을 다시 눌러 주세요.'
+              : '소리를 재생하지 못했어요. 기기 음량, 영어 음성 설정과 인터넷 연결을 확인하거나 다른 브라우저에서 열어 주세요.';
+            setStatus($('speech-status'), detail, 'warning');
+          };
+          setStatus($('speech-status'), '');
+          synth.speak(utterance);
+        } catch (_) {
+          clearSpeakingStyle();
+          currentUtterance = null;
+          setStatus($('speech-status'), '이 기기에서 소리를 시작하지 못했어요. 다른 브라우저에서 다시 열어 주세요.', 'warning');
+        }
+      }
+
+      function hideGoldCard() {
+        clearTimeout(goldTimer);
+        clearTimeout(announcementTimer);
+        $('gold-card').classList.remove('is-visible');
+        $('dictionary-announcement').textContent = '';
+      }
+
+      function showGoldCard(word, meaning) {
+        clearTimeout(goldTimer);
+        clearTimeout(announcementTimer);
+        $('gold-word').textContent = word.replace(/^[^a-zA-Z]+|[^a-zA-Z]+$/g, '');
+        $('gold-meaning').textContent = meaning;
+        $('gold-card').classList.add('is-visible');
+        $('dictionary-announcement').textContent = '';
+        announcementTimer = setTimeout(() => {
+          $('dictionary-announcement').textContent = `${word}의 뜻은 ${meaning}입니다.`;
+        }, 40);
+        goldTimer = setTimeout(hideGoldCard, 2600);
+      }
+
+      function onWordClick(word, button) {
+        button.classList.remove('bounce');
+        void button.offsetWidth;
+        button.classList.add('bounce');
+        const meaning = AppCore.findMeaning(word);
+        if (meaning) showGoldCard(word, meaning);
+        else hideGoldCard();
+        const pronunciation = word.replace(/^[^a-zA-Z]+|[^a-zA-Z]+$/g, '').replace(/[’‘]/g, "'");
+        if (pronunciation) speak(pronunciation, button);
+      }
+
+      function renderStudent(rows) {
+        $('student-mode').hidden = false;
+        const characterThemes = new Map();
+        const fragment = document.createDocumentFragment();
+        rows.forEach((row, index) => {
+          if (!characterThemes.has(row.character)) {
+            characterThemes.set(row.character, themes[characterThemes.size % themes.length]);
+          }
+          const theme = characterThemes.get(row.character);
+          const card = document.createElement('article');
+          card.className = 'dialogue';
+          card.style.setProperty('--theme-bg', theme.bg);
+          card.style.setProperty('--theme-border', theme.border);
+          card.style.setProperty('--theme-word', theme.word);
+          card.setAttribute('aria-labelledby', `character-${index}`);
+
+          const top = document.createElement('div');
+          top.className = 'dialogue-top';
+          const character = document.createElement('div');
+          character.className = 'character';
+          const avatar = document.createElement('span');
+          avatar.className = 'avatar';
+          avatar.textContent = theme.emoji;
+          avatar.setAttribute('aria-hidden', 'true');
+          const nameBlock = document.createElement('div');
+          const number = document.createElement('span');
+          number.className = 'line-number';
+          number.textContent = `${index + 1}번째 대화예요.`;
+          const name = document.createElement('span');
+          name.className = 'character-name';
+          name.id = `character-${index}`;
+          name.textContent = row.character;
+          nameBlock.append(number, name);
+          character.append(avatar, nameBlock);
+
+          const speaker = document.createElement('button');
+          speaker.type = 'button';
+          speaker.className = 'speaker';
+          speaker.setAttribute('aria-label', `${row.character}의 문장 듣기: ${row.english}`);
+          speaker.title = '문장 전체를 들어 보세요.';
+          speaker.append($('speaker-icon').content.cloneNode(true));
+          const speakerLabel = document.createElement('span');
+          speakerLabel.className = 'speaker-label';
+          speakerLabel.textContent = '문장 듣기';
+          speaker.append(speakerLabel);
+          speaker.addEventListener('click', () => {
+            hideGoldCard();
+            speak(row.english, speaker);
+          });
+          top.append(character, speaker);
+
+          const body = document.createElement('div');
+          body.className = 'dialogue-body';
+          const words = document.createElement('div');
+          words.className = 'words';
+          words.lang = 'en';
+          // Keep the requested space-based chunking; empty chunks are discarded.
+          row.english.split(' ').filter(Boolean).forEach(word => {
+            const chunk = document.createElement('button');
+            chunk.type = 'button';
+            chunk.className = 'word';
+            chunk.textContent = word;
+            chunk.setAttribute('aria-label', `${word} 발음 듣기`);
+            chunk.addEventListener('click', () => onWordClick(word, chunk));
+            chunk.addEventListener('animationend', () => chunk.classList.remove('bounce'));
+            words.append(chunk);
+          });
+          const meaning = document.createElement('p');
+          meaning.className = 'meaning';
+          meaning.lang = 'ko';
+          meaning.textContent = row.korean;
+          body.append(words, meaning);
+          card.append(top, body);
+          fragment.append(card);
+        });
+        $('story').replaceChildren(fragment);
+        $('story-count').textContent = `${characterThemes.size}명의 친구와 ${rows.length}개의 문장을 읽어요.`;
+        document.title = '함께 읽어요 · 영어 읽기 놀이터';
+        if (!synth) {
+          $('voice-note').textContent = '이 브라우저는 음성 읽기를 지원하지 않아요. 단어 뜻은 확인할 수 있어요.';
+          setStatus($('speech-status'), '소리를 들으려면 Web Speech API를 지원하는 최신 브라우저에서 열어 주세요.', 'warning');
+        } else {
+          refreshVoices();
+          if (typeof synth.addEventListener === 'function') {
+            synth.addEventListener('voiceschanged', refreshVoices);
+          } else {
+            synth.onvoiceschanged = refreshVoices;
+          }
+        }
+      }
+
+      function invalidateShare() {
+        $('share-panel').hidden = true;
+        $('share-link').value = '';
+        $('preview-link').removeAttribute('href');
+        setStatus($('copy-status'), '');
+      }
+
+      function initTeacher() {
+        $('teacher-mode').hidden = false;
+        $('script-input').value = sampleScript;
+        if (!/^https?:$/.test(window.location.protocol)) {
+          setStatus($('teacher-status'), '지금은 내 기기의 파일을 열었어요. 학생에게 공유하려면 이 HTML 파일을 GitHub Pages 같은 웹 호스팅에 올린 뒤 그 주소에서 링크를 만들어 주세요.', 'warning');
+        }
+        $('script-input').addEventListener('input', () => {
+          invalidateShare();
+          setStatus($('teacher-status'), '');
+        });
+
+        $('translate-button').addEventListener('click', async () => {
+          const btn = $('translate-button');
+          const originalText = btn.textContent;
+          
+          try {
+            // 대본 검사 및 버튼 비활성화 (로딩 상태)
+            const rows = AppCore.parseScript($('script-input').value);
+            btn.disabled = true;
+            btn.textContent = '구글 번역 중... ⏳';
+            setStatus($('teacher-status'), '구글 번역기가 작동 중이에요. 잠시만 기다려 주세요...', 'info');
+
+            let translated = 0;
+            let missing = 0;
+
+            // 비동기 통신을 위해 for...of 반복문 사용
+            for (const row of rows) {
+              if (row.korean && row.korean !== AppCore.TRANSLATION_PLACEHOLDER) continue;
+              
+              const result = await AppCore.translateSentence(row.english);
+              if (result) {
+                row.korean = result;
+                translated += 1;
+              } else {
+                row.korean = AppCore.TRANSLATION_PLACEHOLDER;
+                missing += 1;
+              }
+            }
+
+            $('script-input').value = AppCore.serializeRows(rows);
+            invalidateShare();
+
+            if (missing) {
+              setStatus($('teacher-status'), `${translated}개 문장을 구글 번역했어요. ${missing}개 문장은 번역에 실패하여 [뜻을 직접 입력해 주세요]로 표시했어요.`, 'warning');
+            } else {
+              setStatus($('teacher-status'), `${translated}개 문장을 구글 번역으로 자동 완성했어요! 어색한 말투만 살짝 고친 뒤 배포 링크를 만들어 주세요.`, 'success');
+            }
+          } catch (error) {
+            setStatus($('teacher-status'), error.message, 'error');
+          } finally {
+            // 로딩 상태 해제
+            btn.disabled = false;
+            btn.textContent = originalText;
+          }
+        });
+
+        $('generate-button').addEventListener('click', () => {
+          try {
+            const rows = AppCore.parseScript($('script-input').value, true);
+            const url = getBaseUrl();
+            url.searchParams.set('data', AppCore.encodeScript(AppCore.serializeRows(rows)));
+            const link = url.href;
+            $('share-link').value = link;
+            $('preview-link').href = link;
+            $('share-meta').textContent = `${rows.length}개 문장이 들어 있는 ${link.length.toLocaleString('ko-KR')}자 길이의 링크예요.`;
+            const warnings = [];
+            if (!/^https?:$/.test(url.protocol)) {
+              warnings.push('이 링크는 내 기기의 파일 주소이므로 다른 사람에게 배포할 수 없어요. 웹에 올린 주소에서 다시 만들어 주세요.');
+            }
+            if (link.length > 8000) {
+              warnings.push('링크가 길어서 일부 메신저나 브라우저에서 잘릴 수 있어요. 짧은 이야기 여러 개로 나누는 것을 권장해요. 8,000자는 안내 기준이며 모든 서비스의 공통 제한은 아니에요.');
+            }
+            $('share-warning').hidden = !warnings.length;
+            $('share-warning').textContent = warnings.join('\n');
+            $('share-panel').hidden = false;
+            setStatus($('copy-status'), '');
+            setStatus($('teacher-status'), '배포 링크를 만들었어요. 미리보기로 확인한 뒤 학생에게 보내 주세요.', 'success');
+          } catch (error) {
+            invalidateShare();
+            setStatus($('teacher-status'), error.message, 'error');
+          }
+        });
+
+        $('copy-button').addEventListener('click', async () => {
+          const input = $('share-link');
+          if (!input.value) return;
+          let copied = false;
+          if (navigator.clipboard && window.isSecureContext) {
+            try {
+              await navigator.clipboard.writeText(input.value);
+              copied = true;
+            } catch (_) { /* Restricted clipboard: select the link below. */ }
+          }
+          if (!copied) {
+            input.focus();
+            input.select();
+            input.setSelectionRange(0, input.value.length);
+            try {
+              copied = typeof document.execCommand === 'function' && document.execCommand('copy');
+            } catch (_) { copied = false; }
+          }
+          setStatus($('copy-status'), copied
+            ? '링크를 복사했어요. 학생에게 붙여 넣어 보내 주세요.'
+            : '자동 복사를 사용할 수 없어 링크를 선택했어요. Ctrl+C, Mac에서는 ⌘C를 누르거나 길게 눌러 복사해 주세요.', copied ? 'success' : 'warning');
+        });
+      }
+
+      window.addEventListener('pagehide', () => {
+        ++speechSequence;
+        if (synth) {
+          try { synth.cancel(); } catch (_) { /* No further action is needed. */ }
+        }
+        currentUtterance = null;
+        clearSpeakingStyle();
+        hideGoldCard();
+      });
+
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('data')) {
+        try {
+          if (params.getAll('data').length !== 1) throw new Error('링크에 대본 데이터가 중복되어 있어요.');
+          const script = AppCore.decodeScript(params.get('data'));
+          renderStudent(AppCore.parseScript(script, true));
+        } catch (error) {
+          $('student-mode').hidden = true;
+          $('error-mode').hidden = false;
+          $('error-message').textContent = error.message;
+          $('editor-link').href = getBaseUrl().href;
+        }
+      } else {
+        initTeacher();
+      }
+    })();
+  </script>
+</body>
+</html>
